@@ -1,11 +1,11 @@
 name = "mahasiswa-share"
-compatibility_date = "2026-01-20"
+compatibility_date = "2024-11-01"
 compatibility_flags = ["nodejs_compat"]
 
 [[d1_databases]]
 binding = "DB"
 database_name = "mahasiswa-db"
-database_id = "2eafbd68-dad7-41d6-a7b3-d861228ac1a8" # To be replaced or used locally
+database_id = "your-database-id-here" # To be replaced or used locally
 
 [[r2_buckets]]
 binding = "BUCKET"

@@ -63,13 +63,15 @@ CREATE TABLE upvotes (
 3. Pilih repository GitHub lu (pastiin project ini udah lu push ke GitHub).
 4. Klik **Begin setup**.
 5. Di bagian **Build settings**:
-   - **Framework preset:** Pilih `Next.js`.
+   - **Framework preset:** Pilih `None` (Jangan pilih Next.js bawaan).
    - **Build command:** `npm run pages:build`
    - **Build output directory:** `.vercel/output`
-6. Klik **Save and Deploy**. (Awalnya bakal gagal/error sebentar, nggak apa-apa karena kita belum pasang Database-nya).
+6. Di bagian **Environment variables (Advanced)**, lu **WAJIB** tambahin ini:
+   - **Variable name:** `NODE_VERSION`, **Value:** `20`
+7. Klik **Save and Deploy**. (Awalnya bakal gagal sebentar, lanjut ke step bawah).
 
 ## 4. Hubungkan Database & Storage (PENTING!)
-Setelah deploy pertama jalan (atau gagal), lu harus konekin database-nya:
+Setelah deploy pertama jalan, lu harus konekin database-nya:
 1. Masuk ke project Pages lu tadi di dashboard.
 2. Klik tab **Settings** -> **Functions**.
 3. Scroll ke bawah sampai ketemu **D1 database bindings**. Klik **Add binding**.
@@ -79,19 +81,20 @@ Setelah deploy pertama jalan (atau gagal), lu harus konekin database-nya:
    - **Variable name:** `BUCKET`
    - **R2 bucket:** Pilih `mahasiswa-materi`.
 5. Scroll ke **Compatibility flags**. Klik **Configure flags**.
-   - Tambahin flag: `nodejs_compat`.
+   - Di bagian **Production**, tambahin flag: `nodejs_compat`.
+   - Di bagian **Production**, set **Compatibility date** ke: `2024-11-01` atau yang paling baru.
 6. Klik **Save**.
 
 ## 5. Re-deploy
 1. Klik tab **Deployments**.
 2. Klik tombol tiga titik di deployment yang tadi, terus pilih **Retry deployment**.
-3. **Selesai!** Website lu sekarang udah online dan fungsional. 🚀
+3. **Selesai!** Website lu sekarang udah online. 🚀
 
 ## Tips Kalau Error 404
 Kalau lu buka URL-nya terus muncul **404 Not Found**:
-1. Pastikan **Project Name** di Cloudflare Pages sama dengan yang lu buka di browser.
-2. Pastikan **Build Output Directory** diset ke `.vercel/output` (pake titik di depannya).
-3. Pastikan lu udah nambahin `export const runtime = 'edge';` di file `page.tsx` (udah gw tambahin di semua file utama).
-4. Coba cek tab **Deployments**, pastiin statusnya **Success** (Centang Hijau).
+1. Pastikan **Build Output Directory** di set ke `.vercel/output` (pake titik di depan).
+2. Pastikan **Framework Preset** di set ke `None`.
+3. Pastikan **NODE_VERSION** sudah di set ke `20` di Environment Variables.
+4. Coba cek log di **Deployments** apakah build-nya beneran sukses atau ada error.
 
 Gampang banget kan? No cap, IPK auto naik! ✨
