@@ -5,7 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "mahasiswa-db"
-database_id = "your-database-id-here" # To be replaced or used locally
+database_id = "ad834c98-a23d-4f93-9ff7-1bac14fe28eb" # To be replaced or used locally
 
 [[r2_buckets]]
 binding = "BUCKET"
