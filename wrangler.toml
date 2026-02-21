@@ -6,7 +6,7 @@ pages_build_output_dir = ".vercel/output/static"
 [[d1_databases]]
 binding = "DB"
 database_name = "mahasiswa-db"
-database_id = "your-database-id-here"
+database_id = "5c9c326a-f754-48f9-b493-cae4c8cef276"
 
 [[r2_buckets]]
 binding = "BUCKET"
