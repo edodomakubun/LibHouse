@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { setSession } from '@/lib/auth/session';
 import { getDb } from '@/db';
 import { users } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, or } from 'drizzle-orm';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
@@ -17,36 +16,39 @@ async function hashPassword(password: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json() as any;
+    const { email, username, password } = await req.json() as any;
 
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
+    if (!email || !username || !password) {
+      return NextResponse.json({ error: 'Email, username, and password are required' }, { status: 400 });
     }
 
     const { env } = getRequestContext();
     const db = getDb(env);
 
-    // Find user by email
-    const user = await db.select()
+    // Check if user already exists
+    const existingUser = await db.select()
       .from(users)
-      .where(eq(users.email, email))
+      .where(or(eq(users.email, email), eq(users.username, username)))
       .get();
 
-    if (!user) {
-      return NextResponse.json({ error: 'User tidak ditemukan' }, { status: 401 });
+    if (existingUser) {
+      return NextResponse.json({ error: 'Email or username already taken' }, { status: 400 });
     }
 
     const hashedPassword = await hashPassword(password);
+    const userId = crypto.randomUUID();
 
-    if (user.password !== hashedPassword) {
-      return NextResponse.json({ error: 'Password salah' }, { status: 401 });
-    }
-
-    await setSession({ id: user.id, username: user.username });
+    await db.insert(users).values({
+      id: userId,
+      email,
+      username,
+      password: hashedPassword,
+      name: username,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Login error:', error);
+    console.error('Register error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

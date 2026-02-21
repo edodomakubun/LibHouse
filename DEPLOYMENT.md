@@ -10,7 +10,7 @@ Masalah 404 terjadi karena Cloudflare salah membaca folder output. Ikuti setting
 5. Klik tab **Console**, copy-paste SQL di bawah, terus **Execute**:
 
 ```sql
-CREATE TABLE users (id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, username TEXT NOT NULL UNIQUE, name TEXT, avatar TEXT, created_at INTEGER DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE users (id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, name TEXT, avatar TEXT, created_at INTEGER DEFAULT CURRENT_TIMESTAMP);
 CREATE TABLE materials (id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT, file_key TEXT NOT NULL, category TEXT, user_id TEXT, is_anonymous INTEGER DEFAULT 0, upvotes_count INTEGER DEFAULT 0, created_at INTEGER DEFAULT CURRENT_TIMESTAMP);
 CREATE TABLE comments (id TEXT PRIMARY KEY, material_id TEXT NOT NULL, user_id TEXT, content TEXT NOT NULL, created_at INTEGER DEFAULT CURRENT_TIMESTAMP);
 CREATE TABLE upvotes (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, material_id TEXT NOT NULL);

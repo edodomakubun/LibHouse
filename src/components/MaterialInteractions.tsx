@@ -129,7 +129,7 @@ export function MaterialInteractions({ id, initialUpvotes, initialComments }: Ma
               initialComments.map((c) => (
                 <div key={c.id} className="p-4 bg-white/50 rounded-2xl border border-black/5">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="font-black text-xs italic">@{c.userId || 'Anon'}</span>
+                    <span className="font-black text-xs italic">@{c.username || 'Anon'}</span>
                     <span className="text-[10px] font-bold opacity-30 uppercase">{new Date(c.createdAt).toLocaleDateString()}</span>
                   </div>
                   <p className="text-sm font-medium opacity-80">{c.content}</p>

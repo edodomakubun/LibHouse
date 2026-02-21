@@ -5,7 +5,7 @@ import { MaterialInteractions } from "@/components/MaterialInteractions";
 import Link from "next/link";
 import { getRequestContext } from "@cloudflare/next-on-pages";
 import { getDb } from "@/db";
-import { materials as materialsTable, comments as commentsTable } from "@/db/schema";
+import { materials as materialsTable, comments as commentsTable, users as usersTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
@@ -15,17 +15,45 @@ export const runtime = 'edge';
 export default async function MaterialDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await getSession();
-  let material;
-  let comments = [];
+  let material: any;
+  let comments: any[] = [];
 
   try {
     const { env } = getRequestContext();
     const db = getDb(env);
 
-    material = await db.select().from(materialsTable).where(eq(materialsTable.id, id)).get();
-    if (!material) return notFound();
+    // Fetch material with owner info
+    const materialData = await db
+      .select({
+        material: materialsTable,
+        user: usersTable
+      })
+      .from(materialsTable)
+      .leftJoin(usersTable, eq(materialsTable.userId, usersTable.id))
+      .where(eq(materialsTable.id, id))
+      .get();
 
-    comments = await db.select().from(commentsTable).where(eq(commentsTable.materialId, id)).all();
+    if (!materialData) return notFound();
+    material = {
+      ...materialData.material,
+      ownerUsername: materialData.user?.username || 'Unknown'
+    };
+
+    // Fetch comments with user info
+    const commentsData = await db
+      .select({
+        comment: commentsTable,
+        user: usersTable
+      })
+      .from(commentsTable)
+      .leftJoin(usersTable, eq(commentsTable.userId, usersTable.id))
+      .where(eq(commentsTable.materialId, id))
+      .all();
+
+    comments = commentsData.map(c => ({
+      ...c.comment,
+      username: c.user?.username || 'Unknown'
+    }));
   } catch (e) {
     console.error("Failed to fetch material detail:", e);
     return notFound();
@@ -52,7 +80,7 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
                 </div>
                 <div>
                   <p className="text-xs font-black uppercase tracking-widest opacity-40">Uploaded by</p>
-                  <p className="font-bold">{material.isAnonymous ? "Anonim" : `@${material.userId}`}</p>
+                  <p className="font-bold">{material.isAnonymous ? "Anonim" : `@${material.ownerUsername}`}</p>
                 </div>
               </div>
             </div>
