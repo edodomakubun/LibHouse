@@ -48,3 +48,12 @@ Setelah deploy (walaupun gagal), masuk ke **Settings** project Pages lu:
 **Kenapa 404?** Karena tanpa `/static` di belakang `.vercel/output`, Cloudflare tidak bisa menemukan file utama website lu. Pastikan settingan nomor 3 sudah benar!
 
 Gaskeun! 🚀✨
+
+---
+
+## ⚠️ Security Note (MVP)
+
+Proyek ini adalah **Minimum Viable Product (MVP)**. Beberapa catatan penting:
+- **Authentication:** Menggunakan sistem mock login sederhana dengan cookie yang tidak ter-enkripsi. Untuk penggunaan produksi yang aman, sangat disarankan menggunakan library seperti **Auth.js (NextAuth)**, **Clerk**, atau **Kinde**, serta menggunakan hashing password yang benar (seperti bcrypt/argon2).
+- **R2 Storage:** Pastikan settingan CORS di bucket R2 lu sudah mengizinkan domain website lu agar PDF bisa didownload/ditampilkan dengan benar.
+- **D1 Database:** Selalu backup database lu sebelum melakukan perubahan schema manual lewat SQL.
