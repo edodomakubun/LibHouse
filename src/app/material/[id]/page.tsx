@@ -1,0 +1,90 @@
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Download, ArrowLeft } from "lucide-react";
+import { MaterialInteractions } from "@/components/MaterialInteractions";
+import Link from "next/link";
+import { getRequestContext } from "@cloudflare/next-on-pages";
+import { getDb } from "@/db";
+import { materials as materialsTable, comments as commentsTable } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { notFound } from "next/navigation";
+
+export const runtime = 'edge';
+
+export default async function MaterialDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  let material;
+  let comments = [];
+
+  try {
+    const { env } = getRequestContext();
+    const db = getDb(env);
+
+    material = await db.select().from(materialsTable).where(eq(materialsTable.id, id)).get();
+    if (!material) return notFound();
+
+    comments = await db.select().from(commentsTable).where(eq(commentsTable.materialId, id)).all();
+  } catch (e) {
+    console.error("Failed to fetch material detail:", e);
+    // Mock for dev if needed
+    return notFound();
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto px-6 py-12">
+      <Link href="/explore" className="inline-flex items-center gap-2 font-bold opacity-50 hover:opacity-100 mb-8 transition-opacity">
+        <ArrowLeft size={20} /> Kembali Explore
+      </Link>
+
+      <div className="grid lg:grid-cols-3 gap-12">
+        {/* Left: Material Info */}
+        <div className="lg:col-span-2 flex flex-col gap-8">
+          <div className="flex flex-col gap-4">
+            <Badge variant="blue" className="w-fit">{material.category || "General"}</Badge>
+            <h1 className="text-4xl md:text-5xl font-black italic leading-tight">
+              {material.title}
+            </h1>
+            <div className="flex items-center gap-4 py-2">
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 bg-pastel-purple rounded-full flex items-center justify-center font-bold shadow-sm">
+                  {material.isAnonymous ? "👤" : "✨"}
+                </div>
+                <div>
+                  <p className="text-xs font-black uppercase tracking-widest opacity-40">Uploaded by</p>
+                  <p className="font-bold">{material.isAnonymous ? "Anonim" : `@${material.userId}`}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="card-pastel bg-white border-black/5 min-h-[400px] flex flex-col items-center justify-center text-center p-12 gap-6">
+            <div className="w-20 h-20 bg-pastel-blue/20 rounded-3xl flex items-center justify-center">
+              <Download className="text-pastel-blue" size={40} />
+            </div>
+            <div>
+              <h3 className="text-2xl font-black mb-2 italic">Siap buat dipelajari?</h3>
+              <p className="font-bold opacity-50">Klik tombol di bawah buat download atau liat PDF-nya.</p>
+            </div>
+            <Button variant="primary" className="py-4 px-10 text-lg shadow-xl shadow-black/10">
+              Download PDF
+            </Button>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <h3 className="text-2xl font-black italic">Tentang Materi Ini</h3>
+            <p className="text-xl font-medium opacity-70 leading-relaxed">
+              {material.description || "Gak ada deskripsi nih, pokoknya mantap!"}
+            </p>
+          </div>
+        </div>
+
+        {/* Right: Interaction */}
+        <MaterialInteractions
+          id={material.id}
+          initialUpvotes={material.upvotesCount || 0}
+          initialComments={comments}
+        />
+      </div>
+    </div>
+  );
+}
