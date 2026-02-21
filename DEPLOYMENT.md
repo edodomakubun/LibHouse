@@ -87,4 +87,11 @@ Setelah deploy pertama jalan (atau gagal), lu harus konekin database-nya:
 2. Klik tombol tiga titik di deployment yang tadi, terus pilih **Retry deployment**.
 3. **Selesai!** Website lu sekarang udah online dan fungsional. 🚀
 
+## Tips Kalau Error 404
+Kalau lu buka URL-nya terus muncul **404 Not Found**:
+1. Pastikan **Project Name** di Cloudflare Pages sama dengan yang lu buka di browser.
+2. Pastikan **Build Output Directory** diset ke `.vercel/output` (pake titik di depannya).
+3. Pastikan lu udah nambahin `export const runtime = 'edge';` di file `page.tsx` (udah gw tambahin di semua file utama).
+4. Coba cek tab **Deployments**, pastiin statusnya **Success** (Centang Hijau).
+
 Gampang banget kan? No cap, IPK auto naik! ✨

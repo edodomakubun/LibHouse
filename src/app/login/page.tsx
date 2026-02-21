@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/Input";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 
+export const runtime = 'edge';
+
 export default function LoginPage() {
   return (
     <div className="max-w-md mx-auto px-6 py-20">

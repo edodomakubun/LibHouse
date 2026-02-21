@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/Button";
 import { User, FileText, Heart, Settings } from "lucide-react";
 
+export const runtime = 'edge';
+
 export default function ProfilePage() {
   // Mock data for UI development
   const user = {

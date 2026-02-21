@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 
 import { useRouter } from "next/navigation";
 
+export const runtime = 'edge';
+
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isAnon, setIsAnon] = useState(false);

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, Share2, Zap } from "lucide-react";
 
+export const runtime = 'edge';
+
 export default function Home() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
