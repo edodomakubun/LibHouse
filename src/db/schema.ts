@@ -6,6 +6,7 @@ export const users = sqliteTable("users", {
   email: text("email").notNull().unique(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  role: text("role").default("user"),
   name: text("name"),
   avatar: text("avatar"),
   createdAt: integer("created_at", { mode: "timestamp" }).default(sql`CURRENT_TIMESTAMP`),
@@ -17,6 +18,7 @@ export const materials = sqliteTable("materials", {
   description: text("description"), // Deskripsi materi
   fileKey: text("file_key").notNull(),
   category: text("category"),
+  course: text("course"),
   userId: text("user_id").references(() => users.id),
   isAnonymous: integer("is_anonymous", { mode: "boolean" }).default(false),
   upvotesCount: integer("upvotes_count").default(0),
@@ -35,4 +37,17 @@ export const upvotes = sqliteTable("upvotes", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id),
   materialId: text("material_id").notNull().references(() => materials.id),
+});
+
+export const categories = sqliteTable("categories", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const courses = sqliteTable("courses", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  code: text("code"),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`CURRENT_TIMESTAMP`),
 });

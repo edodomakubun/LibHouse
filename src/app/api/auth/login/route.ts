@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Password salah' }, { status: 401 });
     }
 
-    await setSession({ id: user.id, username: user.username });
+    await setSession({ id: user.id, username: user.username, role: user.role || 'user' });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

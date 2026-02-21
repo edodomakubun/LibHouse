@@ -41,6 +41,9 @@ export default async function RootLayout({
             <Link href="/explore" className="hover:text-pastel-blue transition-colors">Explore</Link>
             {session ? (
               <>
+                {session.role === 'admin' && (
+                  <Link href="/admin" className="text-pastel-purple hover:underline decoration-2 underline-offset-4">Admin</Link>
+                )}
                 <Link href="/upload" className="px-3 py-1.5 md:px-4 md:py-2 bg-black text-white rounded-full hover:bg-pastel-purple hover:text-black transition-all">Upload</Link>
                 <Link href="/profile" className="hover:text-pastel-pink transition-colors">Profile</Link>
               </>

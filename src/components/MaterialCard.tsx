@@ -6,6 +6,7 @@ interface MaterialCardProps {
   id: string;
   title: string;
   category: string;
+  course?: string;
   author: string;
   upvotes: number;
   comments: number;
@@ -17,6 +18,7 @@ export function MaterialCard({
   id,
   title,
   category,
+  course,
   author,
   upvotes,
   comments,
@@ -37,8 +39,15 @@ export function MaterialCard({
         bgColors[color]
       )}>
         <div className="flex justify-between items-start">
-          <div className="px-3 py-1 bg-white/80 rounded-full text-[10px] font-black uppercase tracking-tighter">
-            {category}
+          <div className="flex gap-2">
+            <div className="px-3 py-1 bg-white/80 rounded-full text-[10px] font-black uppercase tracking-tighter">
+              {category}
+            </div>
+            {course && (
+              <div className="px-3 py-1 bg-black text-white rounded-full text-[10px] font-black uppercase tracking-tighter">
+                {course}
+              </div>
+            )}
           </div>
           <FileText className="opacity-20 group-hover:opacity-100 transition-opacity" size={24} />
         </div>

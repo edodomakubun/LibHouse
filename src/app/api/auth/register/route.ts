@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/db';
 import { users } from '@/db/schema';
-import { eq, or } from 'drizzle-orm';
+import { eq, or, sql } from 'drizzle-orm';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
@@ -35,6 +35,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email or username already taken' }, { status: 400 });
     }
 
+    // First user becomes admin
+    const userCount = await db.select({ count: sql`count(*)` }).from(users).get() as { count: number };
+    const role = userCount.count === 0 ? 'admin' : 'user';
+
     const hashedPassword = await hashPassword(password);
     const userId = crypto.randomUUID();
 
@@ -43,6 +47,7 @@ export async function POST(req: NextRequest) {
       email,
       username,
       password: hashedPassword,
+      role: role,
       name: username,
     });
 

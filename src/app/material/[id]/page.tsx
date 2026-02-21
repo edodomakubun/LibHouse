@@ -69,7 +69,10 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
         {/* Left: Material Info */}
         <div className="lg:col-span-2 flex flex-col gap-8">
           <div className="flex flex-col gap-4">
-            <Badge variant="blue" className="w-fit">{material.category || "General"}</Badge>
+            <div className="flex gap-2">
+              <Badge variant="blue" className="w-fit">{material.category || "General"}</Badge>
+              {material.course && <Badge variant="purple" className="w-fit">{material.course}</Badge>}
+            </div>
             <h1 className="text-4xl md:text-5xl font-black italic leading-tight">
               {material.title}
             </h1>

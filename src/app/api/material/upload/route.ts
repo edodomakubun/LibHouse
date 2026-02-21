@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
     const category = formData.get('category') as string;
+    const course = formData.get('course') as string;
     const isAnonymous = formData.get('isAnonymous') === 'true';
 
     if (!file || !title) {
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
       description,
       fileKey,
       category,
+      course,
       isAnonymous,
       userId: session.id,
       upvotesCount: 0,

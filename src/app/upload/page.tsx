@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Upload, File, X, Info, AlignLeft } from "lucide-react";
@@ -15,10 +15,37 @@ export default function UploadPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Lainnya");
+  const [dynamicCategories, setDynamicCategories] = useState<string[]>([]);
+  const [course, setCourse] = useState("");
+  const [dynamicCourses, setDynamicCourses] = useState<any[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
 
-  const categories = ["Teknik", "Ekonomi", "Hukum", "Kedokteran", "Sospol", "MIPA", "Lainnya"];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const catRes = await fetch("/api/admin/categories");
+        const catData = await catRes.json();
+        if (Array.isArray(catData) && catData.length > 0) {
+          const names = catData.map((c: any) => c.name);
+          setDynamicCategories(names);
+          setCategory(names[0]);
+        } else {
+          setDynamicCategories(["Teknik", "Ekonomi", "Hukum", "Kedokteran", "Sospol", "MIPA", "Lainnya"]);
+        }
+
+        const courseRes = await fetch("/api/admin/courses");
+        const courseData = await courseRes.json();
+        if (Array.isArray(courseData)) {
+          setDynamicCourses(courseData);
+        }
+      } catch (e) {
+        console.error(e);
+        setDynamicCategories(["Teknik", "Ekonomi", "Hukum", "Kedokteran", "Sospol", "MIPA", "Lainnya"]);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleUpload = async () => {
     if (!file || !title) return;
@@ -30,6 +57,7 @@ export default function UploadPage() {
       formData.append("title", title);
       formData.append("description", description);
       formData.append("category", category);
+      formData.append("course", course);
       formData.append("isAnonymous", String(isAnon));
 
       const res = await fetch("/api/material/upload", {
@@ -83,9 +111,23 @@ export default function UploadPage() {
           </div>
 
           <div className="flex flex-col gap-2">
+            <label className="text-xs font-black uppercase tracking-widest px-2">Mata Kuliah (Opsional)</label>
+            <select
+              className="w-full rounded-2xl border-2 border-black/5 bg-white/50 px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-pastel-purple appearance-none"
+              value={course}
+              onChange={(e) => setCourse(e.target.value)}
+            >
+              <option value="">Pilih Mata Kuliah...</option>
+              {dynamicCourses.map((c) => (
+                <option key={c.id} value={c.name}>{c.code ? `[${c.code}] ` : ""}{c.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-2">
             <label className="text-xs font-black uppercase tracking-widest px-2">Kategori / Jurusan</label>
             <div className="flex flex-wrap gap-2">
-              {categories.map((cat) => (
+              {dynamicCategories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setCategory(cat)}

@@ -53,7 +53,7 @@ export async function getSession() {
   }
 }
 
-export async function setSession(user: { id: string, username: string }) {
+export async function setSession(user: { id: string, username: string, role?: string }) {
   const cookieStore = await cookies();
   const jsonStr = JSON.stringify(user);
   const payloadBase64 = btoa(Array.from(new TextEncoder().encode(jsonStr), b => String.fromCharCode(b)).join(''));
