@@ -1,77 +1,90 @@
-# Panduan Deployment MahaShare ke Cloudflare Pages
+# Panduan Setup MahaShare (Full Web Dashboard)
 
-MahaShare dirancang untuk berjalan secara optimal di ekosistem Cloudflare. Ikuti langkah-langkah di bawah ini untuk menghubungkan dan men-deploy project ini.
+Kalau lu nggak mau ribet pake terminal/coding di laptop sendiri, lu bisa setup semuanya langsung dari browser di Dashboard Cloudflare. Ikuti langkah-langkah ini:
 
-## 1. Persiapan Database (Cloudflare D1)
+## 1. Buat Database (D1)
+1. Login ke Dashboard Cloudflare.
+2. Klik menu **Workers & Pages** -> **D1**.
+3. Klik **Create database** -> **Dashboard**.
+4. Kasih nama: `mahasiswa-db`. Klik **Create**.
+5. Setelah jadi, klik tab **Console**.
+6. Copy-paste kode SQL di bawah ini ke console buat bikin tabelnya, terus klik **Execute**:
 
-Buka dashboard Cloudflare atau gunakan Wrangler CLI untuk membuat database D1:
+```sql
+CREATE TABLE users (
+  id TEXT PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  username TEXT NOT NULL UNIQUE,
+  name TEXT,
+  avatar TEXT,
+  created_at INTEGER DEFAULT CURRENT_TIMESTAMP
+);
 
-```bash
-npx wrangler d1 create mahasiswa-db
+CREATE TABLE materials (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  file_key TEXT NOT NULL,
+  category TEXT,
+  user_id TEXT,
+  is_anonymous INTEGER DEFAULT 0,
+  upvotes_count INTEGER DEFAULT 0,
+  created_at INTEGER DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE comments (
+  id TEXT PRIMARY KEY,
+  material_id TEXT NOT NULL,
+  user_id TEXT,
+  content TEXT NOT NULL,
+  created_at INTEGER DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (material_id) REFERENCES materials(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE upvotes (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (material_id) REFERENCES materials(id)
+);
 ```
 
-Salin `database_id` yang muncul dan masukkan ke dalam file `wrangler.toml`:
+## 2. Buat Storage (R2)
+1. Klik menu **Workers & Pages** -> **R2**.
+2. Klik **Create bucket**.
+3. Kasih nama: `mahasiswa-materi`. Klik **Create**.
 
-```toml
-[[d1_databases]]
-binding = "DB"
-database_name = "mahasiswa-db"
-database_id = "MASUKKAN-ID-DATABASE-LU-DI-SINI"
-```
-
-Inisialisasi tabel database (local):
-```bash
-npx drizzle-kit push
-```
-
-## 2. Persiapan Storage (Cloudflare R2)
-
-Buat bucket R2 untuk menyimpan file PDF:
-
-```bash
-npx wrangler r2 bucket create mahasiswa-materi
-```
-
-Pastikan nama bucket di `wrangler.toml` sudah sesuai:
-
-```toml
-[[r2_buckets]]
-binding = "BUCKET"
-bucket_name = "mahasiswa-materi"
-```
-
-## 3. Deployment ke Cloudflare Pages
-
-### Melalui CLI (Wrangler):
-
-1. **Build project:**
-   ```bash
-   npm run pages:build
-   ```
-
-2. **Deploy:**
-   ```bash
-   npm run deploy
-   ```
-
-### Melalui Dashboard Cloudflare (GitHub Integration):
-
-1. Push code lu ke GitHub repository.
-2. Di Dashboard Cloudflare, buka **Workers & Pages** -> **Create application** -> **Pages** -> **Connect to Git**.
-3. Pilih repository `mahasiswa-share`.
-4. Gunakan settingan berikut:
-   - **Framework preset:** `Next.js`
+## 3. Deploy Project ke Pages
+1. Klik menu **Workers & Pages** -> **Pages**.
+2. Klik **Connect to Git**.
+3. Pilih repository GitHub lu (pastiin project ini udah lu push ke GitHub).
+4. Klik **Begin setup**.
+5. Di bagian **Build settings**:
+   - **Framework preset:** Pilih `Next.js`.
    - **Build command:** `npm run pages:build`
    - **Build output directory:** `.vercel/output`
-5. Di bagian **Environment Variables**, pastikan **Compatibility Flag** memiliki `nodejs_compat`.
-6. Di bagian **Bindings**, hubungkan:
-   - **D1 Database Binding:** Nama: `DB`, Database: `mahasiswa-db`
-   - **R2 Bucket Binding:** Nama: `BUCKET`, Bucket: `mahasiswa-materi`
+6. Klik **Save and Deploy**. (Awalnya bakal gagal/error sebentar, nggak apa-apa karena kita belum pasang Database-nya).
 
-## 4. Gaskeun! 🚀
+## 4. Hubungkan Database & Storage (PENTING!)
+Setelah deploy pertama jalan (atau gagal), lu harus konekin database-nya:
+1. Masuk ke project Pages lu tadi di dashboard.
+2. Klik tab **Settings** -> **Functions**.
+3. Scroll ke bawah sampai ketemu **D1 database bindings**. Klik **Add binding**.
+   - **Variable name:** `DB`
+   - **D1 database:** Pilih `mahasiswa-db`.
+4. Scroll lagi ke bawah sampai ketemu **R2 bucket bindings**. Klik **Add binding**.
+   - **Variable name:** `BUCKET`
+   - **R2 bucket:** Pilih `mahasiswa-materi`.
+5. Scroll ke **Compatibility flags**. Klik **Configure flags**.
+   - Tambahin flag: `nodejs_compat`.
+6. Klik **Save**.
 
-Setelah proses deploy selesai, website lu bakal langsung online. Lu bisa cek log di dashboard Cloudflare kalau ada error pas build.
+## 5. Re-deploy
+1. Klik tab **Deployments**.
+2. Klik tombol tiga titik di deployment yang tadi, terus pilih **Retry deployment**.
+3. **Selesai!** Website lu sekarang udah online dan fungsional. 🚀
 
-**Notes:**
-- Pastikan lu pake Node.js versi terbaru (v18 ke atas).
-- Kalau mau testing local tapi dapet data asli dari D1, pake `wrangler pages dev`.
+Gampang banget kan? No cap, IPK auto naik! ✨
