@@ -2,16 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { getDb } from '@/db';
 import { materials } from '@/db/schema';
+import { getSession } from '@/lib/auth/session';
+
 export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const title = formData.get('title') as string;
+    const description = formData.get('description') as string;
     const category = formData.get('category') as string;
     const isAnonymous = formData.get('isAnonymous') === 'true';
-    const userId = formData.get('userId') as string;
 
     if (!file || !title) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -32,10 +39,11 @@ export async function POST(req: NextRequest) {
     await db.insert(materials).values({
       id: fileId,
       title,
+      description,
       fileKey,
       category,
       isAnonymous,
-      userId: isAnonymous ? null : userId,
+      userId: session.id,
       upvotesCount: 0,
     });
 

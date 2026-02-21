@@ -1,11 +1,41 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export const runtime = 'edge';
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+      if (res.ok) {
+        router.push("/profile");
+        router.refresh();
+      } else {
+        alert("Login gagal, coba lagi!");
+      }
+    } catch (e) {
+      alert("Error pas login!");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto px-6 py-20">
       <div className="card-pastel bg-white flex flex-col gap-8 shadow-2xl">
@@ -17,16 +47,30 @@ export default function LoginPage() {
           <p className="font-bold opacity-60 italic text-sm">Siap buat bagi-bagi materi lagi? 🔥</p>
         </div>
 
-        <form className="flex flex-col gap-4">
+        <form className="flex flex-col gap-4" onSubmit={handleLogin}>
           <div className="flex flex-col gap-2">
             <label className="text-xs font-black uppercase tracking-widest px-2">Email Lu</label>
-            <Input type="email" placeholder="example@gmail.com" />
+            <Input
+              type="email"
+              placeholder="example@gmail.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
           <div className="flex flex-col gap-2">
             <label className="text-xs font-black uppercase tracking-widest px-2">Password</label>
-            <Input type="password" placeholder="Ssttt... rahasia" />
+            <Input
+              type="password"
+              placeholder="Ssttt... rahasia"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
-          <Button className="mt-4 py-4 text-lg">Login Gaskeun!</Button>
+          <Button type="submit" className="mt-4 py-4 text-lg" disabled={isLoading}>
+            {isLoading ? "Bentar..." : "Login Gaskeun!"}
+          </Button>
         </form>
 
         <div className="text-center">

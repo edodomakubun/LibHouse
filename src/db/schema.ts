@@ -13,9 +13,9 @@ export const users = sqliteTable("users", {
 export const materials = sqliteTable("materials", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
-  description: text("description"),
+  description: text("description"), // Deskripsi materi
   fileKey: text("file_key").notNull(),
-  category: text("category"), // can be used for tags
+  category: text("category"),
   userId: text("user_id").references(() => users.id),
   isAnonymous: integer("is_anonymous", { mode: "boolean" }).default(false),
   upvotesCount: integer("upvotes_count").default(0),

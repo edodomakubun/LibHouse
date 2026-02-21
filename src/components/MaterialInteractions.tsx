@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle, Share2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
@@ -17,18 +17,21 @@ export function MaterialInteractions({ id, initialUpvotes, initialComments }: Ma
   const [isUpvoted, setIsUpvoted] = useState(false);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   const router = useRouter();
 
   const handleUpvote = async () => {
     try {
       const res = await fetch(`/api/material/${id}/upvote`, {
         method: "POST",
-        body: JSON.stringify({ userId: "user_123" }), // Mock
+        body: JSON.stringify({}), // Let the server get userId from session cookie
       });
       if (res.ok) {
         const data = await res.json() as { action: 'added' | 'removed' };
         setIsUpvoted(data.action === 'added');
         setUpvotes(prev => data.action === 'added' ? prev + 1 : prev - 1);
+      } else if (res.status === 401) {
+        router.push('/login');
       }
     } catch (e) {
       console.error(e);
@@ -41,16 +44,36 @@ export function MaterialInteractions({ id, initialUpvotes, initialComments }: Ma
     try {
       const res = await fetch(`/api/material/${id}/comment`, {
         method: "POST",
-        body: JSON.stringify({ content: comment, userId: "user_123" }),
+        body: JSON.stringify({ content: comment }), // Let the server get userId from session cookie
       });
       if (res.ok) {
         setComment("");
-        router.refresh(); // Refresh server component data
+        router.refresh();
+      } else if (res.status === 401) {
+        router.push('/login');
       }
     } catch (e) {
       console.error(e);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'MahaShare - Bagikan Materi',
+          url: url
+        });
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
     }
   };
 
@@ -70,8 +93,8 @@ export function MaterialInteractions({ id, initialUpvotes, initialComments }: Ma
             <Heart size={24} className={cn("transition-all", isUpvoted ? "fill-current scale-110" : "fill-none")} />
           </Button>
         </div>
-        <Button variant="outline" className="w-full border-black/10 bg-white">
-          Bagiin ke Bestie
+        <Button variant="outline" className="w-full flex gap-2 border-black/10 bg-white" onClick={handleShare}>
+          {isCopied ? <><Check size={18} /> Tersalin!</> : <><Share2 size={18} /> Bagiin ke Bestie</>}
         </Button>
       </div>
 

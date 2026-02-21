@@ -2,12 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { getDb } from '@/db';
 import { comments } from '@/db/schema';
+import { getSession } from '@/lib/auth/session';
 
 export const runtime = 'edge';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { content, userId } = await req.json() as { content: string, userId: string };
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { content } = await req.json() as { content: string };
     const { id: materialId } = await params;
 
     if (!content) {
@@ -22,7 +28,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     await db.insert(comments).values({
       id: commentId,
       materialId,
-      userId,
+      userId: session.id,
       content,
     });
 

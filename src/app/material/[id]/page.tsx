@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Download, ArrowLeft } from "lucide-react";
+import { Download, ArrowLeft, Lock } from "lucide-react";
 import { MaterialInteractions } from "@/components/MaterialInteractions";
 import Link from "next/link";
 import { getRequestContext } from "@cloudflare/next-on-pages";
@@ -8,11 +8,13 @@ import { getDb } from "@/db";
 import { materials as materialsTable, comments as commentsTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { getSession } from "@/lib/auth/session";
 
 export const runtime = 'edge';
 
 export default async function MaterialDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const session = await getSession();
   let material;
   let comments = [];
 
@@ -26,7 +28,6 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
     comments = await db.select().from(commentsTable).where(eq(commentsTable.materialId, id)).all();
   } catch (e) {
     console.error("Failed to fetch material detail:", e);
-    // Mock for dev if needed
     return notFound();
   }
 
@@ -59,15 +60,29 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
 
           <div className="card-pastel bg-white border-black/5 min-h-[400px] flex flex-col items-center justify-center text-center p-12 gap-6">
             <div className="w-20 h-20 bg-pastel-blue/20 rounded-3xl flex items-center justify-center">
-              <Download className="text-pastel-blue" size={40} />
+              {session ? <Download className="text-pastel-blue" size={40} /> : <Lock className="text-neutral-300" size={40} />}
             </div>
             <div>
-              <h3 className="text-2xl font-black mb-2 italic">Siap buat dipelajari?</h3>
-              <p className="font-bold opacity-50">Klik tombol di bawah buat download atau liat PDF-nya.</p>
+              <h3 className="text-2xl font-black mb-2 italic">
+                {session ? "Siap buat dipelajari?" : "Login buat download!"}
+              </h3>
+              <p className="font-bold opacity-50">
+                {session ? "Klik tombol di bawah buat download file PDF-nya." : "Materi ini terkunci. Lu harus login dulu buat akses filenya."}
+              </p>
             </div>
-            <Button variant="primary" className="py-4 px-10 text-lg shadow-xl shadow-black/10">
-              Download PDF
-            </Button>
+            {session ? (
+              <a href={`/api/material/${id}/download`} download>
+                <Button variant="primary" className="py-4 px-10 text-lg shadow-xl shadow-black/10">
+                  Download PDF
+                </Button>
+              </a>
+            ) : (
+              <Link href="/login">
+                <Button variant="primary" className="py-4 px-10 text-lg">
+                  Login Sekarang
+                </Button>
+              </Link>
+            )}
           </div>
 
           <div className="flex flex-col gap-4">

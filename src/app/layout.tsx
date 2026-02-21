@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+import { getSession } from "@/lib/auth/session";
 
 export const runtime = 'edge';
 
@@ -20,11 +21,13 @@ export const metadata: Metadata = {
   description: "Platform berbagi materi kuliah paling kece buat Gen Z. No cap, IPK auto naik!",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getSession();
+
   return (
     <html lang="id">
       <body
@@ -36,8 +39,14 @@ export default function RootLayout({
           </Link>
           <div className="flex gap-3 md:gap-6 items-center font-bold text-sm md:text-base">
             <Link href="/explore" className="hover:text-pastel-blue transition-colors">Explore</Link>
-            <Link href="/upload" className="px-3 py-1.5 md:px-4 md:py-2 bg-black text-white rounded-full hover:bg-pastel-purple hover:text-black transition-all">Upload</Link>
-            <Link href="/profile" className="hover:text-pastel-pink transition-colors">Profile</Link>
+            {session ? (
+              <>
+                <Link href="/upload" className="px-3 py-1.5 md:px-4 md:py-2 bg-black text-white rounded-full hover:bg-pastel-purple hover:text-black transition-all">Upload</Link>
+                <Link href="/profile" className="hover:text-pastel-pink transition-colors">Profile</Link>
+              </>
+            ) : (
+              <Link href="/login" className="px-3 py-1.5 md:px-4 md:py-2 bg-pastel-pink text-black rounded-full hover:bg-black hover:text-white transition-all">Login</Link>
+            )}
           </div>
         </nav>
         <main className="pt-24 min-h-screen">

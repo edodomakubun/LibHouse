@@ -3,10 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
-import { Upload, File, X, Info } from "lucide-react";
+import { Upload, File, X, Info, AlignLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 import { useRouter } from "next/navigation";
 
 export const runtime = 'edge';
@@ -15,6 +13,7 @@ export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isAnon, setIsAnon] = useState(false);
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Lainnya");
   const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
@@ -29,9 +28,9 @@ export default function UploadPage() {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("title", title);
+      formData.append("description", description);
       formData.append("category", category);
       formData.append("isAnonymous", String(isAnon));
-      formData.append("userId", "user_123"); // Mock user id
 
       const res = await fetch("/api/material/upload", {
         method: "POST",
@@ -39,8 +38,9 @@ export default function UploadPage() {
       });
 
       if (res.ok) {
-        const data = await res.json();
-        router.push(`/material/\${data.id}`);
+        const data = await res.json() as any;
+        router.push(`/material/${data.id}`);
+        router.refresh();
       } else {
         alert("Waduh, gagal upload nih. Coba lagi ya!");
       }
@@ -67,6 +67,18 @@ export default function UploadPage() {
               placeholder="Misal: Rangkuman Alpro Semester 1"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-black uppercase tracking-widest px-2 flex items-center gap-1">
+              <AlignLeft size={12} /> Deskripsi Materi
+            </label>
+            <textarea
+              className="flex min-h-[100px] w-full rounded-2xl border-2 border-black/5 bg-white/50 px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-pastel-purple focus:ring-offset-2 transition-all"
+              placeholder="Jelasin dikit dong materi ini tentang apa..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 
